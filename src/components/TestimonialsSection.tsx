@@ -308,11 +308,6 @@ export const TestimonialsSection: React.FC = () => {
   return (
     <section className="mt-16 sm:mt-20 w-full max-w-5xl mx-auto px-4 animate-fadeInUp animation-delay-1200">
       {/* Section Header */}
-      {/* Purchase Button - Added above testimonials */}
-      <div className="mb-8 sm:mb-12 flex justify-center">
-        <PurchaseButton />
-      </div>
-      
       <div className="text-center mb-4">
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-blue-900 mb-2">
           <span className="block">No Filters.</span>
@@ -386,68 +381,5 @@ export const TestimonialsSection: React.FC = () => {
         </div>
       </div>
     </section>
-  );
-};
-// Purchase Button Component with RedTrack CID support
-const PurchaseButton: React.FC = () => {
-  const [currentCid, setCurrentCid] = useState<string | null>(null);
-
-  // Detect CID from URL
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const cid = urlParams.get('cid');
-    setCurrentCid(cid);
-    
-    if (cid) {
-      console.log('🎯 RedTrack CID applied to purchase button:', cid);
-    }
-  }, []);
-
-  // Add CID to URL if present
-  const addCidToUrl = (url: string): string => {
-    if (!currentCid || url.includes('cid=')) {
-      return url;
-    }
-    
-    const separator = url.includes('?') ? '&' : '?';
-    return `${url}${separator}cid=${encodeURIComponent(currentCid)}`;
-  };
-
-  const handlePurchaseClick = () => {
-    const baseUrl = 'https://pagamento.paybluedrops.com/checkout/187435552:1';
-    const urlWithCid = addCidToUrl(baseUrl);
-    
-    // Log for debugging
-    if (currentCid) {
-      console.log('🎯 RedTrack CID applied:', currentCid);
-      console.log('🔗 Purchase redirect with CID:', baseUrl, '->', urlWithCid);
-    }
-    
-    // Track the purchase intent
-    if (typeof window !== 'undefined' && (window as any).trackOfferClick) {
-      (window as any).trackOfferClick('special-offer-button');
-    }
-    
-    // Redirect to purchase page
-    window.location.href = urlWithCid;
-  };
-
-  return (
-    <div className="relative animate-fadeInUp animation-delay-1000">
-      {/* Glow effect */}
-      <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500 rounded-2xl blur-lg opacity-60 animate-pulse"></div>
-      
-      <button
-        onClick={handlePurchaseClick}
-        className="relative bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black font-bold py-4 sm:py-5 px-8 sm:px-12 rounded-2xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-2xl text-lg sm:text-xl border-2 border-white/40 backdrop-blur-sm overflow-hidden"
-        style={{ touchAction: 'manipulation' }}
-      >
-        <div className="absolute inset-0 rounded-2xl border border-white/30 pointer-events-none"></div>
-        <span className="relative z-10 flex items-center gap-2">
-          🚀 GET BLUEDROPS NOW
-        </span>
-        <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
-      </button>
-    </div>
   );
 };
