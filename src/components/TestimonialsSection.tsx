@@ -1,8 +1,4 @@
-import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
-import { CheckCircle, Star, Play } from 'lucide-react';
-
-// Lazy load testimonial card to improve initial load
-const TestimonialCard = lazy(() => import('./TestimonialCard'));
+import React, { useState, useEffect, useRef } from 'react';
 
 interface Testimonial {
   id: number;
@@ -32,7 +28,7 @@ export const TestimonialsSection: React.FC = () => {
       id: 1,
       name: "Michael R.",
       location: "Texas",
-      profileImage: "https://i.imgur.com/IYyJR1B.png", // Real profile image
+      profileImage: "https://i.imgur.com/IYyJR1B.png",
       videoId: "68677fbfd890d9c12c549f94", // REAL VTurb video ID
       caption: "BlueDrops completely changed my life. I felt the difference in just 2 weeks!"
     },
@@ -40,7 +36,7 @@ export const TestimonialsSection: React.FC = () => {
       id: 2,
       name: "Robert S.",
       location: "California",
-      profileImage: "https://i.imgur.com/d1raEIm.png", // Real profile image
+      profileImage: "https://i.imgur.com/d1raEIm.png",
       videoId: "6867816a78c1d68a675981f1", // REAL VTurb video ID
       caption: "After 50, I thought there was no hope. BlueDrops proved me wrong!"
     },
@@ -48,7 +44,7 @@ export const TestimonialsSection: React.FC = () => {
       id: 3,
       name: "John O.",
       location: "Florida",
-      profileImage: "https://i.imgur.com/UJ0L2tZ.png", // Real profile image
+      profileImage: "https://i.imgur.com/UJ0L2tZ.png",
       videoId: "68678320c5ab1e6abe6e5b6f", // REAL VTurb video ID
       caption: "My wife noticed the difference before I even told her about BlueDrops!"
     }
@@ -136,7 +132,7 @@ export const TestimonialsSection: React.FC = () => {
     if (!isDragging || isTransitioning) return;
     
     const diff = clientX - startX;
-    const maxDrag = 120; // Increased for better detection
+    const maxDrag = 120;
     
     let clampedDiff = Math.max(-maxDrag * 1.2, Math.min(maxDrag * 1.2, diff));
     
@@ -150,7 +146,7 @@ export const TestimonialsSection: React.FC = () => {
     setIsDragging(false);
     setIsTransitioning(true);
     
-    const threshold = 40; // Increased threshold
+    const threshold = 40;
     const velocityThreshold = 0.3;
     
     let shouldChange = false;
@@ -181,19 +177,16 @@ export const TestimonialsSection: React.FC = () => {
     setLastMoveX(0);
   };
 
-  // ✅ FIXED: Don't prevent default immediately
   const handleMouseDown = (e: React.MouseEvent) => {
     handleDragStart(e.clientX);
   };
 
-  // ✅ FIXED: Don't prevent default on touch start
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 1) {
       handleDragStart(e.touches[0].clientX);
     }
   };
 
-  // ✅ FIXED: Only prevent default when actually dragging
   const handleTouchMove = (e: React.TouchEvent) => {
     if (e.touches.length === 1 && isDragging && Math.abs(dragOffset) > 10) {
       e.preventDefault();
@@ -203,7 +196,6 @@ export const TestimonialsSection: React.FC = () => {
     }
   };
 
-  // ✅ FIXED: Don't prevent default on touch end
   const handleTouchEnd = (e: React.TouchEvent) => {
     handleDragEnd();
   };
@@ -252,7 +244,7 @@ export const TestimonialsSection: React.FC = () => {
   // Better card styling for mobile
   const getCardStyle = (index: number) => {
     const position = index - currentTestimonial;
-    const dragInfluence = dragOffset * 0.2; // Reduced influence for mobile
+    const dragInfluence = dragOffset * 0.2;
     
     let translateX = 0;
     let scale = 1;
@@ -265,25 +257,25 @@ export const TestimonialsSection: React.FC = () => {
       opacity = 1 - Math.abs(dragOffset) * 0.001;
       zIndex = 10;
     } else if (position === 1 || (position === -2 && testimonials.length === 3)) {
-      translateX = 220 + dragInfluence; // Reduced distance for mobile
-      scale = 0.95; // Larger scale for mobile
-      opacity = 0.8; // Higher opacity
+      translateX = 220 + dragInfluence;
+      scale = 0.95;
+      opacity = 0.8;
       zIndex = 5;
     } else if (position === -1 || (position === 2 && testimonials.length === 3)) {
-      translateX = -220 + dragInfluence; // Reduced distance for mobile
-      scale = 0.95; // Larger scale for mobile
-      opacity = 0.8; // Higher opacity
+      translateX = -220 + dragInfluence;
+      scale = 0.95;
+      opacity = 0.8;
       zIndex = 5;
     } else {
-      translateX = position > 0 ? 300 : -300; // Reduced distance
+      translateX = position > 0 ? 300 : -300;
       scale = 0.9;
-      opacity = 0.6; // Higher opacity for visibility
+      opacity = 0.6;
       zIndex = 1;
     }
     
     return {
       transform: `translateX(${translateX}px) scale(${scale})`,
-      opacity: Math.max(0.3, opacity), // Higher minimum opacity
+      opacity: Math.max(0.3, opacity),
       zIndex,
       transition: isDragging ? 'none' : 'all 0.25s ease-out',
     };
@@ -332,7 +324,7 @@ export const TestimonialsSection: React.FC = () => {
         className="relative h-[500px] mb-3"
         style={{ 
           perspective: '800px',
-          touchAction: 'manipulation' // ✅ FIXED: Better touch action
+          touchAction: 'manipulation'
         }}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
@@ -346,17 +338,11 @@ export const TestimonialsSection: React.FC = () => {
             className="absolute inset-0 flex items-center justify-center select-none"
             style={getCardStyle(index)}
           >
-            <Suspense fallback={
-              <div className="bg-white backdrop-blur-sm rounded-2xl p-6 border border-blue-200 shadow-lg max-w-md w-full mx-4 animate-pulse">
-                <div className="h-48 bg-gray-200 rounded"></div>
-              </div>
-            }>
-              <TestimonialCard 
-                testimonial={testimonial} 
-                isActive={index === currentTestimonial}
-                isDragging={isDragging}
-              />
-            </Suspense>
+            <TestimonialCard 
+              testimonial={testimonial} 
+              isActive={index === currentTestimonial}
+              isDragging={isDragging}
+            />
           </div>
         ))}
       </div>
@@ -381,5 +367,173 @@ export const TestimonialsSection: React.FC = () => {
         </div>
       </div>
     </section>
+  );
+};
+
+// ✅ COMPLETELY REIMPLEMENTED: TestimonialCard with NATIVE VTurb structure
+const TestimonialCard: React.FC<{ 
+  testimonial: any; 
+  isActive: boolean; 
+  isDragging: boolean;
+}> = ({ 
+  testimonial, 
+  isActive, 
+  isDragging 
+}) => {
+  // ✅ FIXED: Inject VTurb script only when card is active
+  useEffect(() => {
+    if (isActive) {
+      console.log('🎬 Injecting NATIVE VTurb for testimonial:', testimonial.videoId, testimonial.name);
+      
+      const injectNativeVTurb = () => {
+        // ✅ CRITICAL: Wait for main video to be fully loaded first
+        if (!window.vslVideoLoaded) {
+          console.log('⏳ Waiting for main video to load before injecting testimonial video');
+          setTimeout(injectNativeVTurb, 2000);
+          return;
+        }
+
+        // ✅ Get the target container
+        const targetContainer = document.getElementById(`vid-${testimonial.videoId}`);
+        if (!targetContainer) {
+          console.error('❌ Target container not found for video:', testimonial.videoId);
+          return;
+        }
+
+        // ✅ Clear any existing content
+        targetContainer.innerHTML = '';
+
+        // ✅ NATIVE VTURB IMPLEMENTATION - EXACTLY as you provided
+        if (testimonial.videoId === "68678320c5ab1e6abe6e5b6f") {
+          // JOHN O. - Native VTurb
+          console.log('🎬 Injecting JOHN O. native VTurb');
+          targetContainer.innerHTML = `<vturb-smartplayer id="vid-68678320c5ab1e6abe6e5b6f" style="display: block; margin: 0 auto; width: 100%; "></vturb-smartplayer>`;
+          
+          // ✅ EXACT script as you provided
+          const script = document.createElement('script');
+          script.type = 'text/javascript';
+          script.innerHTML = `var s=document.createElement("script"); s.src="https://scripts.converteai.net/b792ccfe-b151-4538-84c6-42bb48a19ba4/players/68678320c5ab1e6abe6e5b6f/v4/player.js", s.async=!0,document.head.appendChild(s);`;
+          document.head.appendChild(script);
+          console.log('✅ John O. VTurb script injected');
+          
+        } else if (testimonial.videoId === "6867816a78c1d68a675981f1") {
+          // ROBERT S. - Native VTurb
+          console.log('🎬 Injecting ROBERT S. native VTurb');
+          targetContainer.innerHTML = `<vturb-smartplayer id="vid-6867816a78c1d68a675981f1" style="display: block; margin: 0 auto; width: 100%; "></vturb-smartplayer>`;
+          
+          // ✅ EXACT script as you provided
+          const script = document.createElement('script');
+          script.type = 'text/javascript';
+          script.innerHTML = `var s=document.createElement("script"); s.src="https://scripts.converteai.net/b792ccfe-b151-4538-84c6-42bb48a19ba4/players/6867816a78c1d68a675981f1/v4/player.js", s.async=!0,document.head.appendChild(s);`;
+          document.head.appendChild(script);
+          console.log('✅ Robert S. VTurb script injected');
+          
+        } else if (testimonial.videoId === "68677fbfd890d9c12c549f94") {
+          // MICHAEL R. - Native VTurb
+          console.log('🎬 Injecting MICHAEL R. native VTurb');
+          targetContainer.innerHTML = `<vturb-smartplayer id="vid-68677fbfd890d9c12c549f94" style="display: block; margin: 0 auto; width: 100%; "></vturb-smartplayer>`;
+          
+          // ✅ EXACT script as you provided
+          const script = document.createElement('script');
+          script.type = 'text/javascript';
+          script.innerHTML = `var s=document.createElement("script"); s.src="https://scripts.converteai.net/b792ccfe-b151-4538-84c6-42bb48a19ba4/players/68677fbfd890d9c12c549f94/v4/player.js", s.async=!0,document.head.appendChild(s);`;
+          document.head.appendChild(script);
+          console.log('✅ Michael R. VTurb script injected');
+        }
+      };
+      
+      // Try to inject immediately
+      injectNativeVTurb();
+    }
+
+    // Cleanup when card becomes inactive
+    return () => {
+      if (!isActive) {
+        // Clean up scripts when switching testimonials
+        const scripts = document.querySelectorAll(`script[src*="${testimonial.videoId}"]`);
+        scripts.forEach(script => {
+          try {
+            script.remove();
+          } catch (error) {
+            console.error('Error removing testimonial script:', error);
+          }
+        });
+      }
+    };
+  }, [isActive, testimonial.videoId, testimonial.name]);
+
+  return (
+    <div className={`bg-white backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-blue-200 hover:bg-white/95 transition-all duration-300 max-w-md w-full mx-4 ${
+      isDragging ? 'shadow-2xl' : 'shadow-lg'
+    } ${isActive ? 'ring-2 ring-blue-300' : ''}`}>
+      
+      {/* Customer Info - Photo + Name Side by Side */}
+      <div className="flex items-center gap-4 mb-4">
+        <img 
+          src={testimonial.profileImage}
+          alt={testimonial.name}
+          className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-blue-300 flex-shrink-0 shadow-lg"
+          draggable={false}
+          loading="lazy"
+        />
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg sm:text-xl font-bold text-blue-900 leading-tight mb-1">
+            {testimonial.name}
+          </h3>
+          <p className="text-sm sm:text-base text-blue-700 font-medium leading-tight mb-2">
+            {testimonial.location}
+          </p>
+          <div className="inline-flex">
+            <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-2 py-1 rounded-full flex items-center gap-1 shadow-md">
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              <span className="text-xs font-bold">VERIFIED</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Customer Testimonial Quote */}
+      <div className="bg-white/50 backdrop-blur-sm rounded-xl p-3 mb-4 border border-blue-100">
+        <p className="text-sm sm:text-base text-blue-800 leading-relaxed italic">
+          "{testimonial.caption}"
+        </p>
+      </div>
+
+      {/* ✅ NATIVE VTurb video container - ONLY when active */}
+      {isActive && (
+        <div className="mb-4">
+          <div className="aspect-video rounded-xl overflow-hidden shadow-lg bg-gray-900 relative">
+            {/* ✅ PURE VTurb Container - EXACTLY as you provided */}
+            <div
+              id={`vid-${testimonial.videoId}`}
+              style={{
+                display: 'block',
+                margin: '0 auto',
+                width: '100%',
+                height: '100%',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                zIndex: 20
+              }}
+            >
+              {/* Native VTurb content will be injected here */}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rating */}
+      <div className="flex items-center justify-center gap-1">
+        {[...Array(5)].map((_, i) => (
+          <svg key={i} className="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+        ))}
+        <span className="ml-1 text-gray-600 text-sm font-medium">5.0</span>
+      </div>
+    </div>
   );
 };
