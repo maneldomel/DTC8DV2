@@ -152,13 +152,29 @@ export const DownsellPage: React.FC<DownsellPageProps> = ({ variant }) => {
 
   const handleAccept = () => {
     trackOfferClick(`downsell-${variant}-accept`);
-    const url = cartParams ? `${content.acceptUrl}&${cartParams}` : content.acceptUrl;
+    
+    // ✅ NEW: Add CID parameter if present
+    let url = cartParams ? `${content.acceptUrl}&${cartParams}` : content.acceptUrl;
+    const urlParams = new URLSearchParams(window.location.search);
+    const cid = urlParams.get('cid');
+    if (cid && !url.includes('cid=')) {
+      url += (url.includes('?') ? '&' : '?') + 'cid=' + encodeURIComponent(cid);
+    }
+    
     window.location.href = url;
   };
 
   const handleReject = () => {
     trackOfferClick(`downsell-${variant}-reject`);
-    const url = cartParams ? `${content.rejectUrl}&${cartParams}` : content.rejectUrl;
+    
+    // ✅ NEW: Add CID parameter if present
+    let url = cartParams ? `${content.rejectUrl}&${cartParams}` : content.rejectUrl;
+    const urlParams = new URLSearchParams(window.location.search);
+    const cid = urlParams.get('cid');
+    if (cid && !url.includes('cid=')) {
+      url += (url.includes('?') ? '&' : '?') + 'cid=' + encodeURIComponent(cid);
+    }
+    
     window.location.href = url;
   };
 

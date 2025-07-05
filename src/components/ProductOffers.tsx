@@ -34,11 +34,18 @@ export const ProductOffers: React.FC<ProductOffersProps> = ({
     // Call the original onPurchase handler
     onPurchase(packageType);
     
-    // Build URL with tracking parameters
-    const urlWithParams = buildUrlWithParams(purchaseUrls[packageType]);
+    // ✅ NEW: Build URL with tracking parameters + CID if present
+    let urlWithParams = buildUrlWithParams(purchaseUrls[packageType]);
     
-    // Open the purchase page
-    window.open(urlWithParams, '_blank');
+    // Add CID parameter if present in current URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const cid = urlParams.get('cid');
+    if (cid && !urlWithParams.includes('cid=')) {
+      urlWithParams += (urlWithParams.includes('?') ? '&' : '?') + 'cid=' + encodeURIComponent(cid);
+    }
+    
+    // ✅ FIXED: Use window.location.href instead of window.open for better tracking
+    window.location.href = urlWithParams;
   };
 
   const handleSecondaryClick = (packageType: '1-bottle' | '3-bottle') => {

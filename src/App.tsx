@@ -814,6 +814,155 @@ function App() {
         onUpsellRefuse={handleUpsellRefuse}
         getUpsellSavings={getUpsellSavings}
       />
+
+      {/* ✅ NEW: RedTrack CID Integration Script */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const cid = urlParams.get('cid');
+                
+                if (cid) {
+                  console.log('🎯 RedTrack CID detected:', cid);
+                  
+                  // Function to add CID to URL
+                  const addCidToUrl = (url) => {
+                    if (!url || url.includes('cid=')) return url;
+                    return url + (url.includes('?') ? '&' : '?') + 'cid=' + encodeURIComponent(cid);
+                  };
+                  
+                  // Update all existing links to Cartpanda
+                  const updateCartpandaLinks = () => {
+                    document.querySelectorAll('a[href*="cartpanda.com"], a[href*="paybluedrops.com"]').forEach(link => {
+                      if (!link.href.includes('cid=')) {
+                        const originalHref = link.href;
+                        link.href = addCidToUrl(originalHref);
+                        console.log('🔗 Updated link:', originalHref, '->', link.href);
+                      }
+                    });
+                  };
+                  
+                  // Handle button clicks with data-href
+                  const handleButtonClicks = () => {
+                    document.querySelectorAll('button, .btn, [data-href]').forEach(btn => {
+                      // Remove existing listeners to avoid duplicates
+                      btn.removeEventListener('click', btn._cidClickHandler);
+                      
+                      // Create new click handler
+                      btn._cidClickHandler = (e) => {
+                        const href = btn.getAttribute('data-href') || btn.dataset.href;
+                        if (href && (href.includes('cartpanda.com') || href.includes('paybluedrops.com'))) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const newHref = addCidToUrl(href);
+                          console.log('🔘 Button redirect with CID:', href, '->', newHref);
+                          window.location.href = newHref;
+                        }
+                      };
+                      
+                      btn.addEventListener('click', btn._cidClickHandler);
+                    });
+                  };
+                  
+                  // Override window.open and window.location.href for purchase buttons
+                  const originalOpen = window.open;
+                  window.open = function(url, ...args) {
+                    if (url && (url.includes('cartpanda.com') || url.includes('paybluedrops.com'))) {
+                      url = addCidToUrl(url);
+                      console.log('🪟 Window.open with CID:', url);
+                    }
+                    return originalOpen.call(this, url, ...args);
+                  };
+                  
+                  // Initial setup
+                  updateCartpandaLinks();
+                  handleButtonClicks();
+                  
+                  // Re-run when DOM changes (for dynamic content)
+                  const observer = new MutationObserver(() => {
+                    updateCartpandaLinks();
+                    handleButtonClicks();
+                  });
+                  
+                  observer.observe(document.body, {
+                    childList: true,
+                    subtree: true
+                  });
+                  
+                  // Show debug log for admin environments
+                  const showDebugLog = () => {
+                    const hostname = window.location.hostname;
+                    const isDebugEnv = hostname === 'localhost' || 
+                                     hostname.includes('127.0.0.1') || 
+                                     hostname.includes('admin.getmagicbluedrops.com') ||
+                                     hostname.includes('preview') ||
+                                     hostname.includes('stackblitz') ||
+                                     hostname.includes('bolt.new');
+                    
+                    if (isDebugEnv) {
+                      // Remove existing log if present
+                      const existingLog = document.getElementById('redtrack-cid-log');
+                      if (existingLog) existingLog.remove();
+                      
+                      const logDiv = document.createElement('div');
+                      logDiv.id = 'redtrack-cid-log';
+                      logDiv.style.cssText = \`
+                        position: fixed;
+                        bottom: 10px;
+                        right: 10px;
+                        padding: 10px 15px;
+                        background: linear-gradient(135deg, #e0ffe0, #f0fff0);
+                        border: 2px solid #00cc00;
+                        border-radius: 8px;
+                        z-index: 9999;
+                        font-family: 'Courier New', monospace;
+                        font-size: 12px;
+                        font-weight: bold;
+                        color: #006600;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                        max-width: 300px;
+                        word-break: break-all;
+                      \`;
+                      logDiv.innerHTML = \`
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                          <span style="font-size: 16px;">✅</span>
+                          <span style="color: #004400;">RedTrack Integration</span>
+                        </div>
+                        <div style="font-size: 11px; color: #006600;">
+                          <strong>CID:</strong> \${cid}<br>
+                          <strong>Status:</strong> Active & Tracking<br>
+                          <strong>Links:</strong> Auto-updated
+                        </div>
+                      \`;
+                      
+                      document.body.appendChild(logDiv);
+                      
+                      // Auto-hide after 10 seconds
+                      setTimeout(() => {
+                        if (logDiv.parentNode) {
+                          logDiv.style.opacity = '0.7';
+                        }
+                      }, 10000);
+                      
+                      console.log('🎯 RedTrack CID Debug Log displayed for admin environment');
+                    }
+                  };
+                  
+                  // Show debug log after a short delay
+                  setTimeout(showDebugLog, 1000);
+                  
+                } else {
+                  console.log('ℹ️ No CID parameter found in URL');
+                }
+              } catch (error) {
+                console.error('❌ Error in RedTrack CID integration:', error);
+              }
+            })();
+          `
+        }}
+      />
     </div>
   );
 }

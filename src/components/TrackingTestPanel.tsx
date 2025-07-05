@@ -560,6 +560,91 @@ export const TrackingTestPanel: React.FC = () => {
           <p><strong>5. Supabase:</strong> Verifique se os eventos estão sendo salvos no banco de dados</p>
         </div>
       </div>
+
+      {/* ✅ NEW: RedTrack CID Test Section */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          🎯 RedTrack CID Integration
+        </h3>
+        
+        <div className="space-y-4">
+          {/* Current CID Status */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 className="font-semibold text-blue-900 mb-2">Status Atual do CID:</h4>
+            <div id="cid-status" className="text-sm">
+              <script dangerouslySetInnerHTML={{
+                __html: `
+                  (function() {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const cid = urlParams.get('cid');
+                    const statusDiv = document.getElementById('cid-status');
+                    
+                    if (cid) {
+                      statusDiv.innerHTML = \`
+                        <div class="flex items-center gap-2 mb-2">
+                          <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                          <span class="font-medium text-green-700">CID Detectado</span>
+                        </div>
+                        <div class="bg-white p-3 rounded border border-green-200">
+                          <strong>Valor:</strong> <code class="bg-gray-100 px-2 py-1 rounded">\${cid}</code>
+                        </div>
+                        <div class="mt-2 text-green-600 text-xs">
+                          ✅ Todos os links para Cartpanda serão automaticamente atualizados
+                        </div>
+                      \`;
+                    } else {
+                      statusDiv.innerHTML = \`
+                        <div class="flex items-center gap-2 mb-2">
+                          <span class="w-3 h-3 bg-yellow-500 rounded-full"></span>
+                          <span class="font-medium text-yellow-700">Nenhum CID na URL</span>
+                        </div>
+                        <div class="bg-yellow-50 p-3 rounded border border-yellow-200">
+                          <p class="text-yellow-700 text-sm">
+                            Para testar, adicione <code>?cid=test123</code> na URL
+                          </p>
+                        </div>
+                      \`;
+                    }
+                  })();
+                `
+              }} />
+            </div>
+          </div>
+          
+          {/* Test URLs */}
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h4 className="font-semibold text-gray-700 mb-3">URLs de Teste com CID:</h4>
+            <div className="space-y-2 text-sm">
+              <div>
+                <strong>Teste básico:</strong>
+                <br />
+                <code className="text-blue-600 break-all">
+                  {window.location.origin}/?cid=test123
+                </code>
+              </div>
+              <div>
+                <strong>Teste com UTM + CID:</strong>
+                <br />
+                <code className="text-blue-600 break-all">
+                  {window.location.origin}/?utm_source=redtrack&utm_campaign=test&cid=rt_12345
+                </code>
+              </div>
+            </div>
+          </div>
+          
+          {/* Integration Info */}
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <h4 className="font-semibold text-green-800 mb-2">🔗 Como Funciona:</h4>
+            <ul className="text-sm text-green-700 space-y-1">
+              <li>• <strong>Links &lt;a&gt;:</strong> CID adicionado automaticamente a links da Cartpanda</li>
+              <li>• <strong>Botões:</strong> CID incluído em redirecionamentos via data-href</li>
+              <li>• <strong>Window.open:</strong> Interceptado e CID adicionado</li>
+              <li>• <strong>Upsells/Downsells:</strong> CID preservado em todas as páginas</li>
+              <li>• <strong>Monitoramento:</strong> Observer detecta novos elementos dinamicamente</li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
