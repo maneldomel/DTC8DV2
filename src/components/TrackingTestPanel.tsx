@@ -76,10 +76,14 @@ export const TrackingTestPanel: React.FC = () => {
       if (typeof (window as any).hj === 'function') {
         // Test Hotjar by triggering a custom event
         (window as any).hj('event', 'admin_test');
+        
+        // ✅ NEW: Test additional Hotjar functions
+        (window as any).hj('stateChange', '/admin-test');
+        
         updateStatus(index, { 
           status: 'success', 
-          message: 'Hotjar carregado e funcionando',
-          details: 'Script carregado, eventos sendo enviados'
+          message: 'Hotjar carregado e funcionando ✅',
+          details: 'Site ID: 6454408 - Eventos e state changes funcionando'
         });
       } else {
         updateStatus(index, { 
@@ -105,10 +109,17 @@ export const TrackingTestPanel: React.FC = () => {
       if (typeof (window as any).fbq === 'function') {
         // Test Facebook Pixel by triggering a custom event
         (window as any).fbq('trackCustom', 'AdminTest');
+        
+        // ✅ NEW: Test additional Facebook events
+        (window as any).fbq('track', 'ViewContent', {
+          content_type: 'admin_test',
+          content_ids: ['admin_test_123']
+        });
+        
         updateStatus(index, { 
           status: 'success', 
-          message: 'Meta Pixel carregado e funcionando',
-          details: 'Pixel ativo, eventos sendo enviados para Facebook'
+          message: 'Meta Pixel carregado e funcionando ✅',
+          details: 'Pixel ID: 1205864517252800 - Eventos ViewContent e Custom funcionando'
         });
       } else {
         updateStatus(index, { 
@@ -130,12 +141,23 @@ export const TrackingTestPanel: React.FC = () => {
     updateStatus(index, { status: 'loading', message: 'Testando Utmify...' });
     
     try {
-      // Check if Utmify is loaded
-      if (typeof (window as any).utmify === 'function' || window.pixelId) {
+      // ✅ IMPROVED: Better Utmify detection
+      const hasUtmifyFunction = typeof (window as any).utmify === 'function';
+      const hasPixelId = window.pixelId === "681eb087803be4de5c3bd68b";
+      
+      if (hasUtmifyFunction || hasPixelId) {
+        // ✅ NEW: Test Utmify tracking
+        if (hasUtmifyFunction) {
+          (window as any).utmify('track', 'AdminTest', {
+            test_type: 'admin_panel',
+            timestamp: Date.now()
+          });
+        }
+        
         updateStatus(index, { 
           status: 'success', 
-          message: 'Utmify carregado e funcionando',
-          details: `Pixel ID configurado: ${window.pixelId}`
+          message: 'Utmify carregado e funcionando ✅',
+          details: `Pixel ID: ${window.pixelId} - ${hasUtmifyFunction ? 'Função ativa' : 'Carregando'}`
         });
       } else {
         updateStatus(index, { 
@@ -146,11 +168,14 @@ export const TrackingTestPanel: React.FC = () => {
         
         // Wait a bit and check again
         setTimeout(() => {
-          if (typeof (window as any).utmify === 'function' || window.pixelId) {
+          const hasUtmifyFunctionDelayed = typeof (window as any).utmify === 'function';
+          const hasPixelIdDelayed = window.pixelId === "681eb087803be4de5c3bd68b";
+          
+          if (hasUtmifyFunctionDelayed || hasPixelIdDelayed) {
             updateStatus(index, { 
               status: 'success', 
-              message: 'Utmify carregado e funcionando',
-              details: `Pixel ID configurado: ${window.pixelId}`
+              message: 'Utmify carregado e funcionando ✅',
+              details: `Pixel ID: ${window.pixelId} - ${hasUtmifyFunctionDelayed ? 'Função ativa' : 'Script carregado'}`
             });
           } else {
             updateStatus(index, { 
@@ -564,8 +589,55 @@ export const TrackingTestPanel: React.FC = () => {
       {/* ✅ NEW: RedTrack CID Test Section */}
       {/* RedTrack Integration moved to separate component */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-        <p className="text-blue-700 text-sm">
-          <strong>🎯 RedTrack Integration:</strong> Acesse a aba "RedTrack" para testes completos da integração
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-blue-700 text-sm font-semibold mb-1">
+              🎯 RedTrack Integration
+            </p>
+            <p className="text-blue-600 text-xs">
+              Acesse a aba "RedTrack" para testes completos da integração
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-blue-800 text-xs font-mono">
+              CID: {new URLSearchParams(window.location.search).get('cid') || 'none'}
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      {/* ✅ NEW: Pixel Status Summary */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">📊 Resumo dos Pixels</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="text-2xl mb-2">📘</div>
+            <h4 className="font-semibold text-blue-900">Facebook Pixel</h4>
+            <p className="text-blue-700 text-sm">ID: 1205864517252800</p>
+            <p className="text-blue-600 text-xs mt-1">
+              Status: {typeof (window as any).fbq === 'function' ? '✅ Ativo' : '❌ Inativo'}
+            </p>
+          </div>
+          
+          <div className="text-center p-4 bg-orange-50 rounded-lg border border-orange-200">
+            <div className="text-2xl mb-2">🔥</div>
+            <h4 className="font-semibold text-orange-900">Hotjar</h4>
+            <p className="text-orange-700 text-sm">ID: 6454408</p>
+            <p className="text-orange-600 text-xs mt-1">
+              Status: {typeof (window as any).hj === 'function' ? '✅ Ativo' : '❌ Inativo'}
+            </p>
+          </div>
+          
+          <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
+            <div className="text-2xl mb-2">🎯</div>
+            <h4 className="font-semibold text-purple-900">Utmify</h4>
+            <p className="text-purple-700 text-sm">ID: 681eb087803be4de5c3bd68b</p>
+            <p className="text-purple-600 text-xs mt-1">
+              Status: {window.pixelId ? '✅ Ativo' : '❌ Inativo'}
+            </p>
+          </div>
+        </div>
         </p>
       </div>
     </div>
