@@ -6,6 +6,7 @@ import { ConversionFunnel } from './ConversionFunnel';
 import { ConversionHeatmap } from './ConversionHeatmap';
 import { TrackingTestPanel } from './TrackingTestPanel';
 import { ManelChart } from './ManelChart';
+import { RedTrackTestPanel } from './RedTrackTestPanel';
 import { 
   BarChart3, 
   Users, 
@@ -100,7 +101,7 @@ export const AdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [liveSessions, setLiveSessions] = useState<LiveSession[]>([]);
-  const [activeTab, setActiveTab] = useState<'analytics' | 'tracking' | 'settings'>('analytics');
+  const [activeTab, setActiveTab] = useState<'analytics' | 'tracking' | 'redtrack' | 'settings'>('analytics');
   const [contentDelay, setContentDelay] = useState(2155); // ✅ Default to 35min55s
 
   const navigate = useNavigate();
@@ -775,6 +776,17 @@ export const AdminDashboard: React.FC = () => {
                   Tracking
                 </button>
                 <button
+                  onClick={() => setActiveTab('redtrack')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                    activeTab === 'redtrack'
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <Target className="w-4 h-4 inline mr-2" />
+                  RedTrack
+                </button>
+                <button
                   onClick={() => setActiveTab('settings')}
                   className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                     activeTab === 'settings'
@@ -1030,6 +1042,8 @@ export const AdminDashboard: React.FC = () => {
             </>
           ) : activeTab === 'tracking' ? (
             <TrackingTestPanel />
+          ) : activeTab === 'redtrack' ? (
+            <RedTrackTestPanel />
           ) : (
             // ✅ NEW: Settings Tab - Delay Controller
             <div className="space-y-6">
