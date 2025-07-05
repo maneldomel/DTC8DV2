@@ -352,17 +352,17 @@ function App() {
     const checkForPlayer = () => {
       try {
         trackingAttempts++;
-        console.log(`🔍 Tentativa ${trackingAttempts}/${maxAttempts} - Procurando player de vídeo...`);
+        console.log(`🔍 Tentativa ${trackingAttempts}/${maxAttempts} - Procurando player de vídeo PRINCIPAL...`);
         
         // Multiple ways to detect VTurb player
         const playerContainer = document.getElementById('vid_683ba3d1b87ae17c6e07e7db');
         
         if (!playerContainer) {
-          console.log('❌ Container do vídeo não encontrado');
+          console.log('❌ Container do vídeo PRINCIPAL não encontrado (vid_683ba3d1b87ae17c6e07e7db)');
           return;
         }
         
-        console.log('✅ Container do vídeo encontrado:', playerContainer);
+        console.log('✅ Container do vídeo PRINCIPAL encontrado:', playerContainer);
 
         // ✅ FIXED: Force tracking if video is loaded
         if (window.vslVideoLoaded && !hasTrackedPlay) {
@@ -486,7 +486,7 @@ function App() {
       
       // ✅ Stop after max attempts
       if (trackingAttempts >= maxAttempts) {
-        console.log(`⏰ Máximo de tentativas atingido (${maxAttempts}). Parando busca por player.`);
+        console.log(`⏰ Máximo de tentativas atingido (${maxAttempts}). Parando busca por player PRINCIPAL.`);
         clearInterval(trackingInterval);
       }
     };
@@ -540,7 +540,7 @@ function App() {
     };
 
     // Start checking for player immediately and then periodically
-    console.log('🚀 Iniciando setup de tracking de vídeo...');
+    console.log('🚀 Iniciando setup de tracking de vídeo PRINCIPAL...');
     checkForPlayer();
     
     // ✅ FIXED: Use safer setInterval with try/catch
@@ -561,7 +561,7 @@ function App() {
       try {
         if (trackingInterval) {
           clearInterval(trackingInterval);
-          console.log('⏰ Timeout de tracking atingido - parando verificações');
+          console.log('⏰ Timeout de tracking PRINCIPAL atingido - parando verificações');
         }
       } catch (error) {
         console.error('Error clearing tracking interval:', error);
