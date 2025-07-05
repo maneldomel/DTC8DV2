@@ -150,8 +150,10 @@ export const AdminDashboard: React.FC = () => {
       setIsAuthenticated(true);
       setLoginEmail('');
       setLoginPassword('');
+      console.log('✅ Admin login successful');
     } else {
       setLoginError('Email ou senha incorretos');
+      console.log('❌ Admin login failed - incorrect credentials');
     }
     
     setIsLoggingIn(false);
