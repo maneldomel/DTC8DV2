@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { CheckCircle, Star, Play } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
+import { CheckCircle, Star } from 'lucide-react';
 
 interface TestimonialCardProps {
   testimonial: {
@@ -203,67 +203,28 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
         </p>
       </div>
 
-      {/* ✅ FIXED: Video container with proper z-index layering */}
-      {isActive && (
+      {/* ✅ UPDATED: Native VTurb video container - NO PLACEHOLDERS */}
+      {isActive && hasRealVideo && (
         <div className="mb-4">
           <div className="aspect-video rounded-xl overflow-hidden shadow-lg bg-gray-900 relative">
-            {hasRealVideo ? (
-              <>
-                {/* ✅ VTurb Video Container - HIGHEST z-index */}
-                <div
-                  id={`vid-${testimonial.videoId}`}
-                  style={{
-                    display: 'block',
-                    margin: '0 auto',
-                    width: '100%',
-                    height: '100%',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    zIndex: 20,
-                    isolation: 'isolate',
-                    contain: 'layout style paint size'
-                  }}
-                ></div>
-                
-                {/* ✅ Placeholder - Only show while loading */}
-                <div 
-                  id={`placeholder_${testimonial.videoId}`}
-                  className="absolute inset-0 bg-gradient-to-br from-blue-800 to-blue-900 flex items-center justify-center"
-                  style={{ zIndex: 10 }}
-                >
-                  <div className="text-center">
-                    <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-3 mx-auto">
-                      <Play className="w-6 h-6 text-white ml-0.5" />
-                    </div>
-                    <p className="text-white/90 text-base font-medium mb-1">
-                      {testimonial.name}
-                    </p>
-                    <p className="text-white/70 text-sm">
-                      Customer Story
-                    </p>
-                  </div>
-                </div>
-              </>
-            ) : (
-              // Placeholder for other testimonials (no real video)
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-800 to-blue-900 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-3 mx-auto">
-                    <Play className="w-6 h-6 text-white ml-0.5" />
-                  </div>
-                  <p className="text-white/90 text-base font-medium mb-1">
-                    {testimonial.name}
-                  </p>
-                  <p className="text-white/70 text-sm">
-                    Customer Story
-                  </p>
-                  <p className="text-white/50 text-xs mt-2">
-                    Video coming soon
-                  </p>
-                </div>
-              </div>
-            )}
+            {/* ✅ PURE VTurb Container - Exactly as you provided */}
+            <div
+              id={`vid-${testimonial.videoId}`}
+              style={{
+                display: 'block',
+                margin: '0 auto',
+                width: '100%',
+                height: '100%',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                zIndex: 20,
+                isolation: 'isolate',
+                contain: 'layout style paint size'
+              }}
+            >
+              {/* VTurb content will be injected here */}
+            </div>
           </div>
         </div>
       )}
