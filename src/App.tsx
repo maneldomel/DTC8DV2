@@ -14,6 +14,7 @@ import { NewsSection } from './components/NewsSection';
 import { GuaranteeSection } from './components/GuaranteeSection';
 import { Footer } from './components/Footer';
 import { Modals } from './components/Modals';
+import { AppPresentation } from './components/AppPresentation';
 
 function App() {
   const [showPurchaseButton, setShowPurchaseButton] = useState(true); // ✅ FIXED: Always show immediately
@@ -658,6 +659,9 @@ function App() {
 
         {/* Guarantee Section - Always show immediately */}
         <GuaranteeSection />
+
+        {/* App Presentation - NEW */}
+        <AppPresentation />
 
         {/* Better organized final section with proper spacing and alignment - Always show immediately */}
           <section 
