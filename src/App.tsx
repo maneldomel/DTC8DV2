@@ -16,14 +16,14 @@ import { Footer } from './components/Footer';
 import { Modals } from './components/Modals';
 
 function App() {
-  const [showPurchaseButton, setShowPurchaseButton] = useState(false); // Start hidden
+  const [showPurchaseButton, setShowPurchaseButton] = useState(true); // ✅ FIXED: Always show immediately
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [showPopup, setShowPopup] = useState(false); // ✅ DISABLED: Popup removido
   const [showUpsellPopup, setShowUpsellPopup] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState('');
-  const [contentDelay, setContentDelay] = useState(0); // Delay in seconds
+  const [contentDelay, setContentDelay] = useState(0); // ✅ FIXED: No delay
   const [isAdmin, setIsAdmin] = useState(false);
-  const [adminDelayOverride, setAdminDelayOverride] = useState(false);
+  const [adminDelayOverride, setAdminDelayOverride] = useState(true); // ✅ FIXED: Always override delay
 
   // ✅ NEW: Prevent white page after errors
   useEffect(() => {
@@ -86,16 +86,7 @@ function App() {
     };
   }, []);
 
-  // ✅ NEW: Set default delay to 35min55s (2155 seconds)
-  useEffect(() => {
-    // Check if there's a stored delay, if not set to 35min55s
-    const storedDelay = localStorage.getItem('content_delay');
-    if (!storedDelay) {
-      localStorage.setItem('content_delay', '2155'); // 35min55s = 2155 seconds
-      setContentDelay(2155);
-      console.log('🕐 Default delay set to 35min55s (2155 seconds)');
-    }
-  }, []);
+  // ✅ REMOVED: No more delay system
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -137,63 +128,7 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // ✅ FIXED: Handle content delay - Get from localStorage and listen for changes
-  useEffect(() => {
-    // Function to update delay from localStorage
-    const updateDelayFromStorage = () => {
-      const storedDelay = localStorage.getItem('content_delay');
-      const delay = storedDelay ? parseInt(storedDelay) : 0;
-      setContentDelay(delay);
-      console.log('🕐 Content delay updated:', delay, 'seconds');
-    };
-
-    // Initial load
-    updateDelayFromStorage();
-
-    // ✅ NEW: Listen for localStorage changes (when admin changes delay)
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'content_delay') {
-        updateDelayFromStorage();
-      }
-    };
-
-    // ✅ NEW: Listen for custom event (for same-tab changes)
-    const handleDelayChange = () => {
-      updateDelayFromStorage();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('delayChanged', handleDelayChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('delayChanged', handleDelayChange);
-    };
-  }, []);
-
-  // ✅ FIXED: Apply delay when contentDelay changes
-  useEffect(() => {
-    // ✅ NEW: Admin can override delay with DTC button
-    if (adminDelayOverride) {
-      console.log('🔓 Admin override active - showing content immediately');
-      setShowPurchaseButton(true);
-    } else if (contentDelay > 0) {
-      console.log('⏰ Starting delay timer:', contentDelay, 'seconds (', Math.floor(contentDelay/60), 'min', contentDelay%60, 'sec)');
-      setShowPurchaseButton(false); // Hide immediately
-      
-      const timer = setTimeout(() => {
-        console.log('✅ Delay completed after', contentDelay, 'seconds - showing purchase buttons');
-        setShowPurchaseButton(true);
-      }, contentDelay * 1000);
-
-      return () => {
-        clearTimeout(timer);
-      };
-    } else {
-      console.log('🚀 No delay, showing purchase buttons immediately');
-      setShowPurchaseButton(true);
-    }
-  }, [contentDelay, adminDelayOverride]);
+  // ✅ REMOVED: No more delay logic - content shows immediately
 
   useEffect(() => {
     // Initialize URL tracking parameters
@@ -683,39 +618,11 @@ function App() {
     closeUpsellPopup();
   };
 
-  // ✅ NEW: Function to toggle admin delay override
-  const toggleAdminDelayOverride = () => {
-    const newOverride = !adminDelayOverride;
-    setAdminDelayOverride(newOverride);
-    
-    if (newOverride) {
-      console.log('🔓 Admin DTC activated - delay disabled, showing all content');
-    } else {
-      console.log('🔒 Admin DTC deactivated - delay restored');
-    }
-  };
+  // ✅ REMOVED: Admin delay override function - no longer needed
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 via-white to-gray-50 overflow-x-hidden">
-      {/* Admin DTC Button - Only visible for authenticated admins */}
-      {isAdmin && (
-        <div className="fixed top-4 left-4 z-50">
-          <button
-            onClick={toggleAdminDelayOverride}
-            className={`${
-              adminDelayOverride 
-                ? 'bg-red-600 hover:bg-red-700' 
-                : 'bg-green-600 hover:bg-green-700'
-            } text-white px-4 py-2 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2 text-sm font-semibold`}
-            title={adminDelayOverride ? "Delay desabilitado - Clique para reativar" : "Clique para desabilitar delay"}
-          >
-            <span className="text-lg">{adminDelayOverride ? '🔓' : '🔒'}</span>
-            <span className="hidden sm:inline">
-              {adminDelayOverride ? 'DTC ON' : 'DTC OFF'}
-            </span>
-          </button>
-        </div>
-      )}
+      {/* ✅ REMOVED: Admin DTC Button - No longer needed */}
 
       {/* Main container - Always visible */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-6 sm:py-8 max-w-full">
@@ -732,30 +639,27 @@ function App() {
           {/* Video Section */}
           <VideoSection />
 
-          {/* Product Offers - Only show after delay */}
-          {showPurchaseButton && (
+          {/* Product Offers - Always show immediately */}
             <ProductOffers 
               showPurchaseButton={showPurchaseButton}
               onPurchase={handlePurchase}
               onSecondaryPackageClick={handleSecondaryPackageClick}
             />
-          )}
         </div>
 
-        {/* Testimonials Section - Only show after delay */}
-        {showPurchaseButton && <TestimonialsSection />}
+        {/* Testimonials Section - Always show immediately */}
+        <TestimonialsSection />
 
-        {/* Doctors Section - Only show after delay */}
-        {showPurchaseButton && <DoctorsSection />}
+        {/* Doctors Section - Always show immediately */}
+        <DoctorsSection />
 
-        {/* News Section - Only show after delay */}
-        {showPurchaseButton && <NewsSection />}
+        {/* News Section - Always show immediately */}
+        <NewsSection />
 
-        {/* Guarantee Section - Only show after delay */}
-        {showPurchaseButton && <GuaranteeSection />}
+        {/* Guarantee Section - Always show immediately */}
+        <GuaranteeSection />
 
-        {/* Better organized final section with proper spacing and alignment */}
-        {showPurchaseButton && (
+        {/* Better organized final section with proper spacing and alignment - Always show immediately */}
           <section 
             id="final-purchase-section"
             data-purchase-section="true"
@@ -801,7 +705,6 @@ function App() {
               </div>
             </div>
           </section>
-        )}
 
         {/* Footer */}
         <Footer />
