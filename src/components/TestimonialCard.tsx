@@ -67,43 +67,61 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
         targetContainer.style.isolation = 'isolate';
         targetContainer.innerHTML = ''; // ✅ Clear any existing content
 
-        // ✅ FIXED: Simplify HTML structure for all testimonials
-        targetContainer.innerHTML = `
-        <div id="vid_${testimonial.videoId}" style="position:relative;width:100%;padding: 56.25% 0 0 0;">
-          <img id="thumb_${testimonial.videoId}" src="https://images.converteai.net/b792ccfe-b151-4538-84c6-42bb48a19ba4/players/${testimonial.videoId}/thumbnail.jpg" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;">
-          <div id="backdrop_${testimonial.videoId}" style="position:absolute;top:0;width:100%;height:100%;-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);"></div>
-        </div>
-        <style>
-          .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0, 0, 0, 0);white-space:nowrap;border-width:0;}
-        </style>
-      `;
-
-        // ✅ FIXED: Use a simpler approach to avoid script errors
-        try {
-          // Create a placeholder for the video
-          const placeholder = document.createElement('div');
-          placeholder.id = `placeholder-${testimonial.videoId}`;
-          placeholder.className = 'absolute inset-0 bg-gradient-to-br from-blue-800 to-blue-900 flex items-center justify-center';
-          placeholder.style.zIndex = '15';
-          
-          const content = document.createElement('div');
-          content.className = 'text-center';
-          content.innerHTML = `
-            <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-3 mx-auto">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-white ml-0.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            </div>
-            <p class="text-white/90 text-base font-medium mb-1">${testimonial.name}</p>
-            <p class="text-white/70 text-sm">Customer Story</p>
+        // ✅ NEW: Use the exact HTML structure you provided for each testimonial
+        if (testimonial.videoId === "68678320c5ab1e6abe6e5b6f") {
+          // JOHN O.
+          targetContainer.innerHTML = `
+            <vturb-smartplayer id="vid-68678320c5ab1e6abe6e5b6f" style="display: block; margin: 0 auto; width: 100%; "></vturb-smartplayer>
           `;
           
-          placeholder.appendChild(content);
-          targetContainer.appendChild(placeholder);
+          // Inject the script
+          const script = document.createElement('script');
+          script.type = 'text/javascript';
+          script.innerHTML = `
+            var s=document.createElement("script"); 
+            s.src="https://scripts.converteai.net/b792ccfe-b151-4538-84c6-42bb48a19ba4/players/68678320c5ab1e6abe6e5b6f/v4/player.js";
+            s.async=true;
+            document.head.appendChild(s);
+          `;
+          document.head.appendChild(script);
           
-          return true;
-        } catch (error) {
-          console.error('Error creating testimonial placeholder:', error);
-          return false;
+        } else if (testimonial.videoId === "6867816a78c1d68a675981f1") {
+          // ROBERT S.
+          targetContainer.innerHTML = `
+            <vturb-smartplayer id="vid-6867816a78c1d68a675981f1" style="display: block; margin: 0 auto; width: 100%; "></vturb-smartplayer>
+          `;
+          
+          // Inject the script
+          const script = document.createElement('script');
+          script.type = 'text/javascript';
+          script.innerHTML = `
+            var s=document.createElement("script"); 
+            s.src="https://scripts.converteai.net/b792ccfe-b151-4538-84c6-42bb48a19ba4/players/6867816a78c1d68a675981f1/v4/player.js";
+            s.async=true;
+            document.head.appendChild(s);
+          `;
+          document.head.appendChild(script);
+          
+        } else if (testimonial.videoId === "68677fbfd890d9c12c549f94") {
+          // MICHAEL R.
+          targetContainer.innerHTML = `
+            <vturb-smartplayer id="vid-68677fbfd890d9c12c549f94" style="display: block; margin: 0 auto; width: 100%; "></vturb-smartplayer>
+          `;
+          
+          // Inject the script
+          const script = document.createElement('script');
+          script.type = 'text/javascript';
+          script.innerHTML = `
+            var s=document.createElement("script"); 
+            s.src="https://scripts.converteai.net/b792ccfe-b151-4538-84c6-42bb48a19ba4/players/68677fbfd890d9c12c549f94/v4/player.js";
+            s.async=true;
+            document.head.appendChild(s);
+          `;
+          document.head.appendChild(script);
         }
+
+        console.log('✅ VTurb testimonial video injected:', testimonial.videoId);
+        return true;
       };
       
       // Try to inject immediately
