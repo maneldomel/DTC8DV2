@@ -371,7 +371,7 @@ export const TestimonialsSection: React.FC = () => {
   );
 };
 
-// ✅ COMPLETELY REIMPLEMENTED: TestimonialCard with NATIVE VTurb structure
+// ✅ COMPLETELY REIMPLEMENTED: TestimonialCard with EXACT SAME structure as DoctorsSection
 const TestimonialCard: React.FC<{ 
   testimonial: any; 
   isActive: boolean; 
@@ -383,33 +383,49 @@ const TestimonialCard: React.FC<{
 }) => {
   const [videoLoaded, setVideoLoaded] = useState(false);
 
-  // ✅ FIXED: Inject VTurb script only when card is active using NATIVE structure
+  // ✅ FIXED: Use EXACT SAME injection method as DoctorsSection
   useEffect(() => {
     if (isActive) {
-      console.log('🎬 Injecting NATIVE VTurb for testimonial:', testimonial.videoId, testimonial.name);
+      console.log('🎬 Injecting TESTIMONIAL VTurb for:', testimonial.name, 'VideoID:', testimonial.videoId);
       
-      const injectNativeVTurb = () => {
+      const injectTestimonialVideo = () => {
         // ✅ CRITICAL: Wait for main video to be fully loaded first
         if (!window.vslVideoLoaded) {
           console.log('⏳ Waiting for main video to load before injecting testimonial video');
-          setTimeout(injectNativeVTurb, 2000);
+          setTimeout(injectTestimonialVideo, 2000);
           return;
         }
 
-        // ✅ Get the target container - FIXED: Use correct ID format
-        const targetContainer = document.getElementById(`testimonial-vid-${testimonial.videoId}`);
+        // Remove any existing script first
+        const existingScript = document.getElementById(`scr_testimonial_${testimonial.videoId}`);
+        if (existingScript) {
+          try {
+            existingScript.remove();
+          } catch (error) {
+            console.error('Error removing existing testimonial script:', error);
+          }
+        }
+
+        // ✅ CRITICAL: Ensure container exists and is properly isolated BEFORE injecting script
+        const targetContainer = document.getElementById(`vid-${testimonial.videoId}`);
         if (!targetContainer) {
-          console.error('❌ Target container not found for video:', `testimonial-vid-${testimonial.videoId}`);
+          console.error('❌ Target container not found for video:', testimonial.videoId);
           return;
         }
 
-        // ✅ Clear any existing content
-        targetContainer.innerHTML = '';
+        // ✅ Setup container isolation and positioning - EXACT SAME as DoctorsSection
+        targetContainer.style.position = 'absolute';
+        targetContainer.style.top = '0';
+        targetContainer.style.left = '0';
+        targetContainer.style.width = '100%';
+        targetContainer.style.height = '100%';
+        targetContainer.style.zIndex = '20';
+        targetContainer.style.overflow = 'hidden';
+        targetContainer.style.borderRadius = '0.75rem';
+        targetContainer.style.isolation = 'isolate';
+        targetContainer.innerHTML = ''; // ✅ Clear any existing content
 
-        // ✅ NATIVE VTURB IMPLEMENTATION - Create the HTML structure first
-        console.log('🎬 Creating NATIVE VTurb HTML structure for:', testimonial.name);
-        
-        // Create the exact HTML structure that VTurb expects
+        // ✅ EXACT SAME HTML structure as DoctorsSection
         targetContainer.innerHTML = `
           <div id="vid_${testimonial.videoId}" style="position:relative;width:100%;padding: 56.25% 0 0 0;">
             <img id="thumb_${testimonial.videoId}" src="https://images.converteai.net/b792ccfe-b151-4538-84c6-42bb48a19ba4/players/${testimonial.videoId}/thumbnail.jpg" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;">
@@ -419,70 +435,89 @@ const TestimonialCard: React.FC<{
             .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0, 0, 0, 0);white-space:nowrap;border-width:0;}
           </style>
         `;
-        
-        // ✅ Now inject the VTurb script
+
+        // ✅ EXACT SAME script injection as DoctorsSection
         const script = document.createElement('script');
         script.type = 'text/javascript';
-        script.id = `testimonial-script-${testimonial.videoId}`;
+        script.id = `scr_testimonial_${testimonial.videoId}`;
         script.async = true;
+        script.defer = true;
         
-        // Use the EXACT script structure for VTurb
+        // ✅ EXACT SAME script content as DoctorsSection
         script.innerHTML = `
-          console.log('🎬 Loading VTurb script for ${testimonial.name}');
           (function() {
             try {
+              console.log('🎬 Loading testimonial video: ${testimonial.videoId}');
+              
               var s = document.createElement("script");
               s.src = "https://scripts.converteai.net/b792ccfe-b151-4538-84c6-42bb48a19ba4/players/${testimonial.videoId}/player.js";
               s.async = true;
+              
               s.onload = function() {
-                console.log('✅ VTurb script loaded for ${testimonial.name}');
+                console.log('✅ VTurb testimonial video loaded: ${testimonial.videoId}');
+                
+                // ✅ FIXED: Ensure video elements stay in correct container
+                setTimeout(function() {
+                  // ✅ CRITICAL: Prevent video from appearing in main video container
+                  var mainVideoContainer = document.getElementById('vid_683ba3d1b87ae17c6e07e7db');
+                  var testimonialContainer = document.getElementById('vid-${testimonial.videoId}');
+                  
+                  if (mainVideoContainer && testimonialContainer) {
+                    // ✅ Move any testimonial video elements that ended up in main container
+                    var orphanedElements = mainVideoContainer.querySelectorAll('[src*="${testimonial.videoId}"], [data-video-id="${testimonial.videoId}"]');
+                    orphanedElements.forEach(function(element) {
+                      if (element.parentNode === mainVideoContainer) {
+                        testimonialContainer.appendChild(element);
+                        console.log('🔄 Moved testimonial video element back to correct container');
+                      }
+                    });
+                  }
+                  
+                }, 2000);
                 window.testimonialVideoLoaded_${testimonial.videoId} = true;
               };
               s.onerror = function() {
-                console.error('❌ Failed to load VTurb script for ${testimonial.name}');
+                console.error('❌ Failed to load VTurb testimonial video: ${testimonial.videoId}');
               };
               document.head.appendChild(s);
             } catch (error) {
-              console.error('Error injecting VTurb script for ${testimonial.name}:', error);
+              console.error('Error injecting testimonial video script:', error);
             }
           })();
         `;
         
-        // Add script to head
         document.head.appendChild(script);
-        console.log('✅ Native VTurb script injected for:', testimonial.name);
-        
-        // Check if video loaded after a delay
+        console.log('✅ Testimonial VTurb script injected for:', testimonial.name);
+
+        // Check for video load status
         setTimeout(() => {
           if ((window as any)[`testimonialVideoLoaded_${testimonial.videoId}`]) {
             setVideoLoaded(true);
-            console.log('✅ Video loaded for:', testimonial.name);
+            console.log('✅ Testimonial video loaded for:', testimonial.name);
+          } else {
+            console.log('⚠️ Testimonial video not loaded yet, will retry...');
+            // Retry once if not loaded
+            setTimeout(() => injectTestimonialVideo(), 2000);
           }
-        }, 3000);
+        }, 5000);
       };
       
       // Try to inject immediately
-      injectNativeVTurb();
+      injectTestimonialVideo();
     }
 
     // Cleanup when card becomes inactive
     return () => {
       if (!isActive) {
         // Clean up scripts when switching testimonials
-        const script = document.getElementById(`testimonial-script-${testimonial.videoId}`);
+        const script = document.getElementById(`scr_testimonial_${testimonial.videoId}`);
         if (script) {
           try {
             script.remove();
-            console.log('🧹 Cleaned up script for:', testimonial.name);
+            console.log('🧹 Cleaned up testimonial script for:', testimonial.name);
           } catch (error) {
             console.error('Error removing testimonial script:', error);
           }
-        }
-        
-        // Clean up the container
-        const container = document.getElementById(`testimonial-vid-${testimonial.videoId}`);
-        if (container) {
-          container.innerHTML = '';
         }
         
         setVideoLoaded(false);
@@ -527,30 +562,40 @@ const TestimonialCard: React.FC<{
         </p>
       </div>
 
-      {/* ✅ NATIVE VTurb video container - ONLY when active */}
+      {/* ✅ EXACT SAME video container structure as DoctorsSection */}
       {isActive && (
         <div className="mb-4">
-          <div className="aspect-video rounded-xl overflow-hidden shadow-lg bg-gray-900 relative">
-            {/* ✅ FIXED: Use unique ID for each testimonial video */}
+          <div 
+            className="aspect-video rounded-xl overflow-hidden shadow-lg bg-gray-900 relative" 
+            style={{ 
+              isolation: 'isolate',
+              contain: 'layout style paint'
+            }}
+          >
+            {/* ✅ Container with maximum isolation - EXACT SAME as DoctorsSection */}
             <div
-              id={`testimonial-vid-${testimonial.videoId}`}
+              id={`vid-${testimonial.videoId}`}
               style={{
-                display: 'block',
-                margin: '0 auto',
-                width: '100%',
-                height: '100%',
                 position: 'absolute',
                 top: 0,
                 left: 0,
-                zIndex: 20
+                width: '100%',
+                height: '100%',
+                zIndex: 20,
+                overflow: 'hidden',
+                borderRadius: '0.75rem',
+                isolation: 'isolate',
+                contain: 'layout style paint size'
               }}
-            >
-              {/* VTurb HTML structure will be injected here */}
-            </div>
+            ></div>
             
-            {/* Loading placeholder - only show if video not loaded */}
+            {/* ✅ Placeholder - Only show while loading */}
             {!videoLoaded && (
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-800 to-blue-900 flex items-center justify-center" style={{ zIndex: 10 }}>
+              <div 
+                id={`placeholder_${testimonial.videoId}`}
+                className="absolute inset-0 bg-gradient-to-br from-blue-800 to-blue-900 flex items-center justify-center"
+                style={{ zIndex: 10 }}
+              >
                 <div className="text-center">
                   <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-3 mx-auto">
                     <Play className="w-6 h-6 text-white ml-0.5" />
@@ -559,7 +604,7 @@ const TestimonialCard: React.FC<{
                     {testimonial.name}
                   </p>
                   <p className="text-white/70 text-sm">
-                    Loading testimonial...
+                    Customer Story
                   </p>
                 </div>
               </div>
