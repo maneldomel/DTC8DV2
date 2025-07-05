@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { CheckCircle, Star } from 'lucide-react';
 
 interface Testimonial {
   id: number;
@@ -380,7 +381,7 @@ const TestimonialCard: React.FC<{
   isActive, 
   isDragging 
 }) => {
-  // ✅ FIXED: Inject VTurb script only when card is active
+  // ✅ FIXED: Inject VTurb script only when card is active using NATIVE structure
   useEffect(() => {
     if (isActive) {
       console.log('🎬 Injecting NATIVE VTurb for testimonial:', testimonial.videoId, testimonial.name);
@@ -404,42 +405,39 @@ const TestimonialCard: React.FC<{
         targetContainer.innerHTML = '';
 
         // ✅ NATIVE VTURB IMPLEMENTATION - EXACTLY as you provided
-        if (testimonial.videoId === "68678320c5ab1e6abe6e5b6f") {
-          // JOHN O. - Native VTurb
-          console.log('🎬 Injecting JOHN O. native VTurb');
-          targetContainer.innerHTML = `<vturb-smartplayer id="vid-68678320c5ab1e6abe6e5b6f" style="display: block; margin: 0 auto; width: 100%; "></vturb-smartplayer>`;
-          
-          // ✅ EXACT script as you provided
-          const script = document.createElement('script');
-          script.type = 'text/javascript';
-          script.innerHTML = `var s=document.createElement("script"); s.src="https://scripts.converteai.net/b792ccfe-b151-4538-84c6-42bb48a19ba4/players/68678320c5ab1e6abe6e5b6f/v4/player.js", s.async=!0,document.head.appendChild(s);`;
-          document.head.appendChild(script);
-          console.log('✅ John O. VTurb script injected');
-          
-        } else if (testimonial.videoId === "6867816a78c1d68a675981f1") {
-          // ROBERT S. - Native VTurb
-          console.log('🎬 Injecting ROBERT S. native VTurb');
-          targetContainer.innerHTML = `<vturb-smartplayer id="vid-6867816a78c1d68a675981f1" style="display: block; margin: 0 auto; width: 100%; "></vturb-smartplayer>`;
-          
-          // ✅ EXACT script as you provided
-          const script = document.createElement('script');
-          script.type = 'text/javascript';
-          script.innerHTML = `var s=document.createElement("script"); s.src="https://scripts.converteai.net/b792ccfe-b151-4538-84c6-42bb48a19ba4/players/6867816a78c1d68a675981f1/v4/player.js", s.async=!0,document.head.appendChild(s);`;
-          document.head.appendChild(script);
-          console.log('✅ Robert S. VTurb script injected');
-          
-        } else if (testimonial.videoId === "68677fbfd890d9c12c549f94") {
-          // MICHAEL R. - Native VTurb
-          console.log('🎬 Injecting MICHAEL R. native VTurb');
-          targetContainer.innerHTML = `<vturb-smartplayer id="vid-68677fbfd890d9c12c549f94" style="display: block; margin: 0 auto; width: 100%; "></vturb-smartplayer>`;
-          
-          // ✅ EXACT script as you provided
-          const script = document.createElement('script');
-          script.type = 'text/javascript';
-          script.innerHTML = `var s=document.createElement("script"); s.src="https://scripts.converteai.net/b792ccfe-b151-4538-84c6-42bb48a19ba4/players/68677fbfd890d9c12c549f94/v4/player.js", s.async=!0,document.head.appendChild(s);`;
-          document.head.appendChild(script);
-          console.log('✅ Michael R. VTurb script injected');
-        }
+        console.log('🎬 Creating NATIVE VTurb element for:', testimonial.name);
+        
+        // Create the vturb-smartplayer element
+        const vTurbPlayer = document.createElement('vturb-smartplayer');
+        vTurbPlayer.id = `vid-${testimonial.videoId}`;
+        vTurbPlayer.style.cssText = 'display: block; margin: 0 auto; width: 100%; height: 100%;';
+        
+        // Clear and add the player to container
+        targetContainer.appendChild(vTurbPlayer);
+        
+        // ✅ EXACT script injection as you provided
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.id = `testimonial-script-${testimonial.videoId}`;
+        
+        // Use the EXACT script structure you provided
+        script.innerHTML = `
+          console.log('🎬 Loading VTurb script for ${testimonial.name}');
+          var s=document.createElement("script"); 
+          s.src="https://scripts.converteai.net/b792ccfe-b151-4538-84c6-42bb48a19ba4/players/${testimonial.videoId}/v4/player.js";
+          s.async=!0;
+          s.onload = function() {
+            console.log('✅ VTurb script loaded for ${testimonial.name}');
+          };
+          s.onerror = function() {
+            console.error('❌ Failed to load VTurb script for ${testimonial.name}');
+          };
+          document.head.appendChild(s);
+        `;
+        
+        // Add script to head
+        document.head.appendChild(script);
+        console.log('✅ Native VTurb script injected for:', testimonial.name);
       };
       
       // Try to inject immediately
@@ -450,14 +448,21 @@ const TestimonialCard: React.FC<{
     return () => {
       if (!isActive) {
         // Clean up scripts when switching testimonials
-        const scripts = document.querySelectorAll(`script[src*="${testimonial.videoId}"]`);
-        scripts.forEach(script => {
+        const script = document.getElementById(`testimonial-script-${testimonial.videoId}`);
+        if (script) {
           try {
             script.remove();
+            console.log('🧹 Cleaned up script for:', testimonial.name);
           } catch (error) {
             console.error('Error removing testimonial script:', error);
           }
-        });
+        }
+        
+        // Clean up the container
+        const container = document.getElementById(`vid-${testimonial.videoId}`);
+        if (container) {
+          container.innerHTML = '';
+        }
       }
     };
   }, [isActive, testimonial.videoId, testimonial.name]);
@@ -485,9 +490,7 @@ const TestimonialCard: React.FC<{
           </p>
           <div className="inline-flex">
             <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-2 py-1 rounded-full flex items-center gap-1 shadow-md">
-              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
+              <CheckCircle className="w-3 h-3" />
               <span className="text-xs font-bold">VERIFIED</span>
             </div>
           </div>
@@ -505,7 +508,7 @@ const TestimonialCard: React.FC<{
       {isActive && (
         <div className="mb-4">
           <div className="aspect-video rounded-xl overflow-hidden shadow-lg bg-gray-900 relative">
-            {/* ✅ PURE VTurb Container - EXACTLY as you provided */}
+            {/* ✅ PURE VTurb Container - Will contain the native vturb-smartplayer */}
             <div
               id={`vid-${testimonial.videoId}`}
               style={{
@@ -519,7 +522,7 @@ const TestimonialCard: React.FC<{
                 zIndex: 20
               }}
             >
-              {/* Native VTurb content will be injected here */}
+              {/* Native VTurb vturb-smartplayer will be injected here */}
             </div>
           </div>
         </div>
@@ -528,9 +531,7 @@ const TestimonialCard: React.FC<{
       {/* Rating */}
       <div className="flex items-center justify-center gap-1">
         {[...Array(5)].map((_, i) => (
-          <svg key={i} className="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20">
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-          </svg>
+          <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
         ))}
         <span className="ml-1 text-gray-600 text-sm font-medium">5.0</span>
       </div>
