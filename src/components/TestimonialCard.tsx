@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { CheckCircle, Star } from 'lucide-react';
 
 interface TestimonialCardProps {
@@ -27,54 +27,34 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
   // ✅ FIXED: Inject VTurb script only when card is active and has real video
   useEffect(() => {
     if (isActive && hasRealVideo) {
-      let checkInterval: number;
+      console.log('🎬 Injecting native VTurb for testimonial:', testimonial.videoId);
       
       const injectVideo = () => {
         // ✅ CRITICAL: Wait for main video to be fully loaded first
         if (!window.vslVideoLoaded) {
           console.log('⏳ Waiting for main video to load before injecting testimonial video');
-          return false;
-        }
-
-        console.log('🎬 Injecting testimonial video:', testimonial.videoId);
-        
-        // Remove any existing script first
-        const existingScript = document.getElementById(`scr_testimonial_${testimonial.videoId}`);
-        if (existingScript) {
-          try {
-            existingScript.remove();
-          } catch (error) {
-            console.error('Error removing existing testimonial script:', error);
-          }
+          setTimeout(injectVideo, 2000);
+          return;
         }
 
         // ✅ CRITICAL: Ensure container exists and is properly isolated BEFORE injecting script
         const targetContainer = document.getElementById(`vid-${testimonial.videoId}`);
         if (!targetContainer) {
           console.error('❌ Target container not found for video:', testimonial.videoId);
-          return false;
+          return;
         }
 
-        // ✅ Setup container isolation and positioning
-        targetContainer.style.position = 'absolute';
-        targetContainer.style.top = '0';
-        targetContainer.style.left = '0';
-        targetContainer.style.width = '100%';
-        targetContainer.style.height = '100%';
-        targetContainer.style.zIndex = '20';
-        targetContainer.style.overflow = 'hidden';
-        targetContainer.style.borderRadius = '0.75rem';
-        targetContainer.style.isolation = 'isolate';
-        targetContainer.innerHTML = ''; // ✅ Clear any existing content
+        // ✅ Clear any existing content
+        targetContainer.innerHTML = '';
 
-        // ✅ NEW: Use the exact HTML structure you provided for each testimonial
+        // ✅ NEW: Use the EXACT native VTurb structure you provided
         if (testimonial.videoId === "68678320c5ab1e6abe6e5b6f") {
-          // JOHN O.
+          // JOHN O. - Native VTurb
           targetContainer.innerHTML = `
             <vturb-smartplayer id="vid-68678320c5ab1e6abe6e5b6f" style="display: block; margin: 0 auto; width: 100%; "></vturb-smartplayer>
           `;
           
-          // Inject the script
+          // Inject the exact script you provided
           const script = document.createElement('script');
           script.type = 'text/javascript';
           script.innerHTML = `
@@ -84,14 +64,15 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
             document.head.appendChild(s);
           `;
           document.head.appendChild(script);
+          console.log('✅ John O. VTurb injected');
           
         } else if (testimonial.videoId === "6867816a78c1d68a675981f1") {
-          // ROBERT S.
+          // ROBERT S. - Native VTurb
           targetContainer.innerHTML = `
             <vturb-smartplayer id="vid-6867816a78c1d68a675981f1" style="display: block; margin: 0 auto; width: 100%; "></vturb-smartplayer>
           `;
           
-          // Inject the script
+          // Inject the exact script you provided
           const script = document.createElement('script');
           script.type = 'text/javascript';
           script.innerHTML = `
@@ -101,14 +82,15 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
             document.head.appendChild(s);
           `;
           document.head.appendChild(script);
+          console.log('✅ Robert S. VTurb injected');
           
         } else if (testimonial.videoId === "68677fbfd890d9c12c549f94") {
-          // MICHAEL R.
+          // MICHAEL R. - Native VTurb
           targetContainer.innerHTML = `
             <vturb-smartplayer id="vid-68677fbfd890d9c12c549f94" style="display: block; margin: 0 auto; width: 100%; "></vturb-smartplayer>
           `;
           
-          // Inject the script
+          // Inject the exact script you provided
           const script = document.createElement('script');
           script.type = 'text/javascript';
           script.innerHTML = `
@@ -118,50 +100,26 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
             document.head.appendChild(s);
           `;
           document.head.appendChild(script);
+          console.log('✅ Michael R. VTurb injected');
         }
-
-        console.log('✅ VTurb testimonial video injected:', testimonial.videoId);
-        return true;
       };
       
       // Try to inject immediately
-      const success = injectVideo();
-      
-      // If not successful, retry periodically
-      if (!success) {
-        checkInterval = window.setInterval(() => {
-          const success = injectVideo();
-          if (success) {
-            window.clearInterval(checkInterval);
-          }
-        }, 2000);
-        
-        // Stop checking after 30 seconds
-        setTimeout(() => {
-          if (checkInterval) {
-            window.clearInterval(checkInterval);
-          }
-        }, 30000);
-      }
-      
-      return () => {
-        if (checkInterval) {
-          window.clearInterval(checkInterval);
-        }
-      };
+      injectVideo();
     }
 
     // Cleanup when card becomes inactive
     return () => {
       if (!isActive) {
-        const scriptToRemove = document.getElementById(`scr_testimonial_${testimonial.videoId}`);
-        if (scriptToRemove) {
+        // Clean up scripts when switching testimonials
+        const scripts = document.querySelectorAll(`script[src*="${testimonial.videoId}"]`);
+        scripts.forEach(script => {
           try {
-            scriptToRemove.remove();
+            script.remove();
           } catch (error) {
             console.error('Error removing testimonial script:', error);
           }
-        }
+        });
       }
     };
   }, [isActive, hasRealVideo, testimonial.videoId]);
@@ -203,7 +161,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
         </p>
       </div>
 
-      {/* ✅ UPDATED: Native VTurb video container - NO PLACEHOLDERS */}
+      {/* ✅ UPDATED: Native VTurb video container - EXACTLY like doctors */}
       {isActive && hasRealVideo && (
         <div className="mb-4">
           <div className="aspect-video rounded-xl overflow-hidden shadow-lg bg-gray-900 relative">
@@ -219,11 +177,10 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
                 top: 0,
                 left: 0,
                 zIndex: 20,
-                isolation: 'isolate',
-                contain: 'layout style paint size'
+                isolation: 'isolate'
               }}
             >
-              {/* VTurb content will be injected here */}
+              {/* Native VTurb content will be injected here */}
             </div>
           </div>
         </div>
