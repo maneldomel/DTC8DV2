@@ -153,13 +153,12 @@ export const DownsellPage: React.FC<DownsellPageProps> = ({ variant }) => {
   const handleAccept = () => {
     trackOfferClick(`downsell-${variant}-accept`);
     
-    // ✅ IMPROVED: Add CID parameter from URL or session
+    // ✅ NEW: Add CID parameter if present
     let url = cartParams ? `${content.acceptUrl}&${cartParams}` : content.acceptUrl;
     const urlParams = new URLSearchParams(window.location.search);
-    const cid = urlParams.get('cid') || sessionStorage.getItem('redtrack_cid');
+    const cid = urlParams.get('cid');
     if (cid && !url.includes('cid=')) {
       url += (url.includes('?') ? '&' : '?') + 'cid=' + encodeURIComponent(cid);
-      console.log('🎯 RedTrack CID applied to downsell accept:', cid);
     }
     
     window.location.href = url;
@@ -168,13 +167,12 @@ export const DownsellPage: React.FC<DownsellPageProps> = ({ variant }) => {
   const handleReject = () => {
     trackOfferClick(`downsell-${variant}-reject`);
     
-    // ✅ IMPROVED: Add CID parameter from URL or session
+    // ✅ NEW: Add CID parameter if present
     let url = cartParams ? `${content.rejectUrl}&${cartParams}` : content.rejectUrl;
     const urlParams = new URLSearchParams(window.location.search);
-    const cid = urlParams.get('cid') || sessionStorage.getItem('redtrack_cid');
+    const cid = urlParams.get('cid');
     if (cid && !url.includes('cid=')) {
       url += (url.includes('?') ? '&' : '?') + 'cid=' + encodeURIComponent(cid);
-      console.log('🎯 RedTrack CID applied to downsell reject:', cid);
     }
     
     window.location.href = url;

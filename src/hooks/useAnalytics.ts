@@ -383,62 +383,6 @@ export const useAnalytics = () => {
 
     const initializeAnalytics = async () => {
       try {
-        // Initialize URL tracking parameters
-        const initializeUrlTracking = () => {
-          try {
-            // Store URL parameters in sessionStorage for persistence
-            const urlParams = new URLSearchParams(window.location.search);
-            const trackingParams: Record<string, string> = {};
-            
-            // ✅ EXPANDED: All tracking parameters to preserve
-            const trackingKeys = [
-              'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
-              'fbclid', 'gclid', 'ttclid', 'twclid', 'li_fat_id',
-              'msclkid', 'yclid', 'wbraid', 'gbraid',
-              'hsa_acc', 'hsa_cam', 'hsa_grp', 'hsa_ad', 'hsa_src', 'hsa_tgt', 'hsa_kw', 'hsa_mt', 'hsa_net', 'hsa_ver',
-              'cid', 'sid', 'tid', 'pid',
-              'affiliate_id', 'sub_id', 'click_id', 'transaction_id',
-              'fb_action_ids', 'fb_action_types', 'fb_source',
-              'hj_session_id', 'hj_user_id',
-              'utmify_id', 'pixel_id'
-            ];
-            
-            trackingKeys.forEach(key => {
-              const value = urlParams.get(key);
-              if (value) {
-                trackingParams[key] = value;
-              }
-            });
-            
-            if (Object.keys(trackingParams).length > 0) {
-              sessionStorage.setItem('tracking_params', JSON.stringify(trackingParams));
-              console.log('📊 Tracking parameters stored:', trackingParams);
-            }
-            
-            // ✅ IMPROVED: Track page view with all external pixels
-            if (typeof window !== 'undefined' && (window as any).fbq) {
-              (window as any).fbq('track', 'PageView');
-              console.log('📘 Facebook PageView tracked');
-            }
-            
-            if (typeof window !== 'undefined' && (window as any).utmify) {
-              (window as any).utmify('track', 'PageView');
-              console.log('🎯 Utmify PageView tracked');
-            }
-            
-            // ✅ NEW: Track Hotjar page view
-            if (typeof window !== 'undefined' && (window as any).hj) {
-              (window as any).hj('stateChange', window.location.pathname);
-              console.log('🔥 Hotjar state change tracked');
-            }
-          } catch (error) {
-            console.error('Error initializing URL tracking:', error);
-          }
-        };
-
-        // Initialize URL tracking first
-        initializeUrlTracking();
-        
         // Load geolocation data first
         geolocationData.current = await getGeolocationData();
         isGeolocationLoaded.current = true;
@@ -703,49 +647,10 @@ export const useAnalytics = () => {
   const trackOfferClick = (offerType: '1-bottle' | '3-bottle' | '6-bottle' | string) => {
     if (isBrazilianIP.current) return; // ✅ SKIP if Brazilian
     
-    // ✅ IMPROVED: Track with all pixels
-    const eventData = {
-      offer_type: offerType,
-      country: geolocationData.current?.country_name || 'Unknown',
-      value: getOfferValue(offerType),
-      currency: 'BRL'
-    };
-    
     trackEvent('offer_click', { 
       offer_type: offerType,
       country: geolocationData.current?.country_name || 'Unknown'
     });
-    
-    // ✅ NEW: Track across all pixels
-    if (typeof window !== 'undefined') {
-      // Facebook Pixel
-      if ((window as any).fbq) {
-        (window as any).fbq('track', 'AddToCart', eventData);
-        console.log('📘 Facebook AddToCart tracked:', eventData);
-      }
-      
-      // Utmify
-      if ((window as any).utmify) {
-        (window as any).utmify('track', 'AddToCart', eventData);
-        console.log('🎯 Utmify AddToCart tracked:', eventData);
-      }
-      
-      // Hotjar
-      if ((window as any).hj) {
-        (window as any).hj('event', `offer_click_${offerType}`);
-        console.log('🔥 Hotjar offer click tracked:', offerType);
-      }
-    }
-  };
-  
-  // ✅ NEW: Helper function to get offer value
-  const getOfferValue = (offerType: string): number => {
-    const values: Record<string, number> = {
-      '1-bottle': 79,
-      '3-bottle': 198,
-      '6-bottle': 294
-    };
-    return values[offerType] || 0;
   };
 
   return {

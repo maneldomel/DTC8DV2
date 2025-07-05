@@ -29,18 +29,9 @@ export const getTrackingParams = (): UTMParams => {
   const trackingKeys = [
     'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
     'fbclid', 'gclid', 'ttclid', 'twclid', 'li_fat_id',
-    'msclkid', 'yclid', 'wbraid', 'gbraid', // ✅ NEW: Additional Google/Microsoft tracking
-    'hsa_acc', 'hsa_cam', 'hsa_grp', 'hsa_ad', 'hsa_src', 'hsa_tgt', 'hsa_kw', 'hsa_mt', 'hsa_net', 'hsa_ver', // ✅ NEW: Google Ads parameters
-    'cid', 'sid', 'tid', 'pid', // ✅ NEW: RedTrack and other tracking IDs
     'affiliate_id', 'sub_id', 'click_id', 'transaction_id',
     'order_id', 'customer_id', 'email', 'phone',
-    'first_name', 'last_name', 'address', 'city', 'state', 'zip', 'country',
-    // ✅ NEW: Facebook and social media tracking
-    'fb_action_ids', 'fb_action_types', 'fb_source',
-    // ✅ NEW: Hotjar and analytics tracking
-    'hj_session_id', 'hj_user_id',
-    // ✅ NEW: Utmify tracking
-    'utmify_id', 'pixel_id'
+    'first_name', 'last_name', 'address', 'city', 'state', 'zip', 'country'
   ];
   
   trackingKeys.forEach(key => {
@@ -148,8 +139,6 @@ export const initializeTracking = (): void => {
  * Track conversion events
  */
 export const trackConversion = (eventName: string, value?: number, currency?: string): void => {
-  console.log('🎯 Tracking conversion:', eventName, { value, currency });
-  
   // Facebook Pixel conversion tracking
   if (typeof window !== 'undefined' && (window as any).fbq) {
     const eventData: any = {};
@@ -157,7 +146,6 @@ export const trackConversion = (eventName: string, value?: number, currency?: st
     if (currency) eventData.currency = currency;
     
     (window as any).fbq('track', eventName, eventData);
-    console.log('📘 Facebook Pixel event tracked:', eventName, eventData);
   }
   
   // Utmify conversion tracking
@@ -167,13 +155,6 @@ export const trackConversion = (eventName: string, value?: number, currency?: st
     if (currency) eventData.currency = currency;
     
     (window as any).utmify('track', 'Conversion', eventData);
-    console.log('🎯 Utmify event tracked:', eventName, eventData);
-  }
-  
-  // ✅ NEW: Hotjar event tracking
-  if (typeof window !== 'undefined' && (window as any).hj) {
-    (window as any).hj('event', eventName);
-    console.log('🔥 Hotjar event tracked:', eventName);
   }
 };
 
@@ -181,42 +162,10 @@ export const trackConversion = (eventName: string, value?: number, currency?: st
  * Track purchase events
  */
 export const trackPurchase = (value: number, currency: string = 'BRL', productType?: string): void => {
-  console.log('🛒 Tracking purchase:', { value, currency, productType });
-  
   trackConversion('Purchase', value, currency);
   
   // Additional tracking for specific product types
   if (productType) {
     trackConversion(`Purchase_${productType}`, value, currency);
-  }
-  
-  // ✅ NEW: Track with all pixels simultaneously
-  trackAllPixels('Purchase', { value, currency, product_type: productType });
-};
-
-/**
- * ✅ NEW: Track event across all pixels simultaneously
- */
-export const trackAllPixels = (eventName: string, eventData?: any): void => {
-  console.log('🎯 Tracking across all pixels:', eventName, eventData);
-  
-  // Facebook Pixel
-  if (typeof window !== 'undefined' && (window as any).fbq) {
-    (window as any).fbq('track', eventName, eventData || {});
-  }
-  
-  // Utmify
-  if (typeof window !== 'undefined' && (window as any).utmify) {
-    (window as any).utmify('track', eventName, eventData || {});
-  }
-  
-  // Hotjar
-  if (typeof window !== 'undefined' && (window as any).hj) {
-    (window as any).hj('event', eventName);
-  }
-  
-  // Google Analytics (if present)
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', eventName, eventData || {});
   }
 };
