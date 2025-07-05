@@ -102,7 +102,7 @@ export const AdminDashboard: React.FC = () => {
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [liveSessions, setLiveSessions] = useState<LiveSession[]>([]);
   const [activeTab, setActiveTab] = useState<'analytics' | 'tracking' | 'redtrack' | 'settings'>('analytics');
-  const [contentDelay, setContentDelay] = useState(2155); // ✅ Default to 35min55s
+  const [contentDelay, setContentDelay] = useState(0); // ✅ FIXED: No delay by default
 
   const navigate = useNavigate();
 
@@ -175,11 +175,11 @@ export const AdminDashboard: React.FC = () => {
     // Dispatch custom event to notify main app
     window.dispatchEvent(new CustomEvent('delayChanged'));
     
-    console.log('🕐 Admin changed delay to:', newDelay, 'seconds (', Math.floor(newDelay/60), 'min', newDelay%60, 'sec)');
+    console.log('🕐 Admin changed delay to:', newDelay, 'seconds - NOTE: Delay system has been removed, this setting has no effect');
   };
 
   const resetToDefault = () => {
-    handleDelayChange(2155); // 35min55s
+    handleDelayChange(0); // ✅ FIXED: Default to no delay
   };
 
   // Enhanced country flag mapping
@@ -1051,50 +1051,49 @@ export const AdminDashboard: React.FC = () => {
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Clock className="w-5 h-5 text-blue-600" />
-                  <h3 className="text-lg font-semibold text-gray-900">Configuração de Delay</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">Configuração de Delay (DESABILITADO)</h3>
                 </div>
 
-                <p className="text-sm text-gray-600 mb-6">
-                  Configure quanto tempo esperar antes de mostrar os botões de compra e seções abaixo do vídeo.
+                <p className="text-sm text-red-600 mb-6 font-semibold">
+                  ⚠️ SISTEMA DE DELAY REMOVIDO: Todos os botões e seções agora aparecem imediatamente. Esta configuração não tem mais efeito.
                 </p>
 
                 {/* Current Status */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
                   <div className="flex items-center gap-2 mb-2">
-                    <Eye className="w-4 h-4 text-blue-600" />
-                    <span className="text-sm font-medium text-blue-800">
-                      Status atual: {contentDelay === 0 ? 'Sem delay' : `${formatTime(contentDelay)} (${contentDelay} segundos)`}
+                    <Eye className="w-4 h-4 text-red-600" />
+                    <span className="text-sm font-medium text-red-800">
+                      Status atual: DELAY REMOVIDO - Conteúdo sempre visível
                     </span>
                   </div>
-                  {contentDelay === 2155 && (
-                    <div className="bg-yellow-100 border border-yellow-300 rounded px-2 py-1 inline-block">
-                      <span className="text-yellow-800 text-xs font-bold">PADRÃO - 35min55s</span>
-                    </div>
-                  )}
+                  <div className="bg-red-100 border border-red-300 rounded px-2 py-1 inline-block">
+                    <span className="text-red-800 text-xs font-bold">SISTEMA DESABILITADO</span>
+                  </div>
                 </div>
 
-                {/* Preset Buttons */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+                {/* Preset Buttons - Disabled */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6 opacity-50">
                   {[
                     { label: 'Sem delay', value: 0 },
                     { label: '30 segundos', value: 30 },
                     { label: '1 minuto', value: 60 },
                     { label: '2 minutos', value: 120 },
                     { label: '5 minutos', value: 300 },
-                    { label: '35min55s (PADRÃO)', value: 2155, isDefault: true }
+                    { label: '35min55s (REMOVIDO)', value: 2155, isDefault: true }
                   ].map((preset) => (
                     <button
                       key={preset.value}
                       onClick={() => handleDelayChange(preset.value)}
+                      disabled={true}
                       className={`p-3 text-sm rounded-lg border transition-colors ${
                         contentDelay === preset.value
                           ? preset.isDefault 
-                            ? 'bg-yellow-500 text-white border-yellow-600'
-                            : 'bg-blue-600 text-white border-blue-600'
+                            ? 'bg-red-500 text-white border-red-600'
+                            : 'bg-red-600 text-white border-red-600'
                           : preset.isDefault
-                            ? 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100'
-                            : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
-                      }`}
+                            ? 'bg-red-50 text-red-700 border-red-200'
+                            : 'bg-gray-50 text-gray-700 border-gray-200'
+                      } cursor-not-allowed`}
                     >
                       {preset.label}
                     </button>
@@ -1116,27 +1115,29 @@ export const AdminDashboard: React.FC = () => {
                         const value = parseInt(e.target.value) || 0;
                         handleDelayChange(value);
                       }}
+                      disabled={true}
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="0"
                     />
                     <button
                       onClick={resetToDefault}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors font-medium"
+                      disabled={true}
+                      className="bg-red-500 text-white px-4 py-2 rounded-lg font-medium cursor-not-allowed opacity-50"
                     >
-                      Padrão
+                      Removido
                     </button>
                   </div>
                 </div>
 
                 {/* Info */}
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-yellow-800 mb-2">💡 Informações Importantes:</h4>
-                  <ul className="text-sm text-yellow-700 space-y-1">
-                    <li>• <strong>35min55s (2155 segundos)</strong> é o delay padrão recomendado</li>
-                    <li>• Este é o momento exato quando o pitch aparece no vídeo</li>
-                    <li>• O delay só afeta os botões de compra e seções abaixo do vídeo</li>
-                    <li>• O vídeo e seções informativas sempre ficam visíveis</li>
-                    <li>• Mudanças são aplicadas imediatamente em todas as sessões</li>
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-red-800 mb-2">⚠️ Sistema de Delay Removido:</h4>
+                  <ul className="text-sm text-red-700 space-y-1">
+                    <li>• <strong>Todos os botões e seções</strong> agora aparecem imediatamente</li>
+                    <li>• <strong>Não há mais delay</strong> - o conteúdo é sempre visível</li>
+                    <li>• <strong>Esta configuração</strong> foi mantida apenas para referência</li>
+                    <li>• <strong>Para reativar o delay</strong> seria necessário modificar o código</li>
+                    <li>• <strong>Conversões podem aumentar</strong> com acesso imediato aos botões</li>
                   </ul>
                 </div>
               </div>
