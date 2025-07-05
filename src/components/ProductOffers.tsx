@@ -37,11 +37,12 @@ export const ProductOffers: React.FC<ProductOffersProps> = ({
     // ✅ NEW: Build URL with tracking parameters + CID if present
     let urlWithParams = buildUrlWithParams(purchaseUrls[packageType]);
     
-    // Add CID parameter if present in current URL
+    // ✅ IMPROVED: Check both URL and sessionStorage for CID
     const urlParams = new URLSearchParams(window.location.search);
-    const cid = urlParams.get('cid');
+    const cid = urlParams.get('cid') || sessionStorage.getItem('redtrack_cid');
     if (cid && !urlWithParams.includes('cid=')) {
       urlWithParams += (urlWithParams.includes('?') ? '&' : '?') + 'cid=' + encodeURIComponent(cid);
+      console.log('🎯 RedTrack CID applied to purchase:', cid);
     }
     
     // ✅ FIXED: Use window.location.href instead of window.open for better tracking

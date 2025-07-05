@@ -87,6 +87,9 @@ export const setupRedTrackIntegration = (): void => {
   if (cid) {
     console.log('🎯 RedTrack CID detected:', cid);
     
+    // Store CID in sessionStorage for persistence
+    sessionStorage.setItem('redtrack_cid', cid);
+    
     // Initial update
     updatePurchaseLinks();
     
@@ -113,8 +116,42 @@ export const setupRedTrackIntegration = (): void => {
     // Show debug info in development
     showDebugInfo(cid);
   } else {
-    console.log('ℹ️ No CID parameter found in URL');
+    // Check if we have a stored CID from previous page
+    const storedCid = sessionStorage.getItem('redtrack_cid');
+    if (storedCid) {
+      console.log('🎯 RedTrack CID restored from session:', storedCid);
+      // Use stored CID for this session
+      updatePurchaseLinksWithCid(storedCid);
+    } else {
+      console.log('ℹ️ No CID parameter found in URL or session');
+    }
   }
+};
+
+/**
+ * Update purchase links with specific CID
+ */
+const updatePurchaseLinksWithCid = (cid: string): void => {
+  // Update all links
+  document.querySelectorAll('a[href]').forEach((link: Element) => {
+    const anchor = link as HTMLAnchorElement;
+    if (isPurchaseUrl(anchor.href)) {
+      const originalHref = anchor.href;
+      anchor.href = addCidToUrl(originalHref, cid);
+      console.log('🔗 Updated link with stored CID:', originalHref, '->', anchor.href);
+    }
+  });
+
+  // Update buttons with data-href
+  document.querySelectorAll('[data-href]').forEach((element: Element) => {
+    const href = element.getAttribute('data-href');
+    if (href && isPurchaseUrl(href)) {
+      const originalHref = href;
+      const newHref = addCidToUrl(originalHref, cid);
+      element.setAttribute('data-href', newHref);
+      console.log('🔘 Updated button data-href with stored CID:', originalHref, '->', newHref);
+    }
+  });
 };
 
 /**
