@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { CheckCircle, Star } from 'lucide-react';
+import { CheckCircle, Star, Play } from 'lucide-react';
 
 interface Testimonial {
   id: number;
@@ -381,6 +381,8 @@ const TestimonialCard: React.FC<{
   isActive, 
   isDragging 
 }) => {
+  const [videoLoaded, setVideoLoaded] = useState(false);
+
   // ✅ FIXED: Inject VTurb script only when card is active using NATIVE structure
   useEffect(() => {
     if (isActive) {
@@ -394,50 +396,69 @@ const TestimonialCard: React.FC<{
           return;
         }
 
-        // ✅ Get the target container
-        const targetContainer = document.getElementById(`vid-${testimonial.videoId}`);
+        // ✅ Get the target container - FIXED: Use correct ID format
+        const targetContainer = document.getElementById(`testimonial-vid-${testimonial.videoId}`);
         if (!targetContainer) {
-          console.error('❌ Target container not found for video:', testimonial.videoId);
+          console.error('❌ Target container not found for video:', `testimonial-vid-${testimonial.videoId}`);
           return;
         }
 
         // ✅ Clear any existing content
         targetContainer.innerHTML = '';
 
-        // ✅ NATIVE VTURB IMPLEMENTATION - EXACTLY as you provided
-        console.log('🎬 Creating NATIVE VTurb element for:', testimonial.name);
+        // ✅ NATIVE VTURB IMPLEMENTATION - Create the HTML structure first
+        console.log('🎬 Creating NATIVE VTurb HTML structure for:', testimonial.name);
         
-        // Create the vturb-smartplayer element
-        const vTurbPlayer = document.createElement('vturb-smartplayer');
-        vTurbPlayer.id = `vid-${testimonial.videoId}`;
-        vTurbPlayer.style.cssText = 'display: block; margin: 0 auto; width: 100%; height: 100%;';
+        // Create the exact HTML structure that VTurb expects
+        targetContainer.innerHTML = `
+          <div id="vid_${testimonial.videoId}" style="position:relative;width:100%;padding: 56.25% 0 0 0;">
+            <img id="thumb_${testimonial.videoId}" src="https://images.converteai.net/b792ccfe-b151-4538-84c6-42bb48a19ba4/players/${testimonial.videoId}/thumbnail.jpg" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;">
+            <div id="backdrop_${testimonial.videoId}" style="position:absolute;top:0;width:100%;height:100%;-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);"></div>
+          </div>
+          <style>
+            .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0, 0, 0, 0);white-space:nowrap;border-width:0;}
+          </style>
+        `;
         
-        // Clear and add the player to container
-        targetContainer.appendChild(vTurbPlayer);
-        
-        // ✅ EXACT script injection as you provided
+        // ✅ Now inject the VTurb script
         const script = document.createElement('script');
         script.type = 'text/javascript';
         script.id = `testimonial-script-${testimonial.videoId}`;
+        script.async = true;
         
-        // Use the EXACT script structure you provided
+        // Use the EXACT script structure for VTurb
         script.innerHTML = `
           console.log('🎬 Loading VTurb script for ${testimonial.name}');
-          var s=document.createElement("script"); 
-          s.src="https://scripts.converteai.net/b792ccfe-b151-4538-84c6-42bb48a19ba4/players/${testimonial.videoId}/v4/player.js";
-          s.async=!0;
-          s.onload = function() {
-            console.log('✅ VTurb script loaded for ${testimonial.name}');
-          };
-          s.onerror = function() {
-            console.error('❌ Failed to load VTurb script for ${testimonial.name}');
-          };
-          document.head.appendChild(s);
+          (function() {
+            try {
+              var s = document.createElement("script");
+              s.src = "https://scripts.converteai.net/b792ccfe-b151-4538-84c6-42bb48a19ba4/players/${testimonial.videoId}/player.js";
+              s.async = true;
+              s.onload = function() {
+                console.log('✅ VTurb script loaded for ${testimonial.name}');
+                window.testimonialVideoLoaded_${testimonial.videoId} = true;
+              };
+              s.onerror = function() {
+                console.error('❌ Failed to load VTurb script for ${testimonial.name}');
+              };
+              document.head.appendChild(s);
+            } catch (error) {
+              console.error('Error injecting VTurb script for ${testimonial.name}:', error);
+            }
+          })();
         `;
         
         // Add script to head
         document.head.appendChild(script);
         console.log('✅ Native VTurb script injected for:', testimonial.name);
+        
+        // Check if video loaded after a delay
+        setTimeout(() => {
+          if ((window as any)[`testimonialVideoLoaded_${testimonial.videoId}`]) {
+            setVideoLoaded(true);
+            console.log('✅ Video loaded for:', testimonial.name);
+          }
+        }, 3000);
       };
       
       // Try to inject immediately
@@ -459,10 +480,12 @@ const TestimonialCard: React.FC<{
         }
         
         // Clean up the container
-        const container = document.getElementById(`vid-${testimonial.videoId}`);
+        const container = document.getElementById(`testimonial-vid-${testimonial.videoId}`);
         if (container) {
           container.innerHTML = '';
         }
+        
+        setVideoLoaded(false);
       }
     };
   }, [isActive, testimonial.videoId, testimonial.name]);
@@ -508,9 +531,9 @@ const TestimonialCard: React.FC<{
       {isActive && (
         <div className="mb-4">
           <div className="aspect-video rounded-xl overflow-hidden shadow-lg bg-gray-900 relative">
-            {/* ✅ PURE VTurb Container - Will contain the native vturb-smartplayer */}
+            {/* ✅ FIXED: Use unique ID for each testimonial video */}
             <div
-              id={`vid-${testimonial.videoId}`}
+              id={`testimonial-vid-${testimonial.videoId}`}
               style={{
                 display: 'block',
                 margin: '0 auto',
@@ -522,8 +545,25 @@ const TestimonialCard: React.FC<{
                 zIndex: 20
               }}
             >
-              {/* Native VTurb vturb-smartplayer will be injected here */}
+              {/* VTurb HTML structure will be injected here */}
             </div>
+            
+            {/* Loading placeholder - only show if video not loaded */}
+            {!videoLoaded && (
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-800 to-blue-900 flex items-center justify-center" style={{ zIndex: 10 }}>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-3 mx-auto">
+                    <Play className="w-6 h-6 text-white ml-0.5" />
+                  </div>
+                  <p className="text-white/90 text-base font-medium mb-1">
+                    {testimonial.name}
+                  </p>
+                  <p className="text-white/70 text-sm">
+                    Loading testimonial...
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
